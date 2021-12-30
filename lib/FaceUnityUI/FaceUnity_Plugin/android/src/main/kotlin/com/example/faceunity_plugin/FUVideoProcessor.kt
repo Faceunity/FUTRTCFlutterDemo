@@ -57,17 +57,18 @@ class FUVideoProcessor(application: Context) : TRTCCloudListener.TRTCVideoFrameL
      */
     override fun onProcessVideoFrame(srcFrame: TRTCCloudDef.TRTCVideoFrame?, dstFrame: TRTCCloudDef.TRTCVideoFrame?): Int {
         val input : FURenderInputData = FURenderInputData(srcFrame!!.width, srcFrame.height)
-                .apply {
-                    texture = FURenderInputData.FUTexture(FUInputTextureEnum.FU_ADM_FLAG_COMMON_TEXTURE, srcFrame.texture.textureId)
-                    renderConfig.apply {
-                        externalInputType = FUExternalInputEnum.EXTERNAL_INPUT_TYPE_CAMERA
-                        inputOrientation = 180
-                        cameraFacing = CameraFacingEnum.CAMERA_FRONT
-                        inputTextureMatrix = FUTransformMatrixEnum.CCROT0
-                        outputMatrix = FUTransformMatrixEnum.CCROT0_FLIPVERTICAL
-                        deviceOrientation = this@FUVideoProcessor.deviceOrientation
-                    }
+            .apply {
+                texture = FURenderInputData.FUTexture(FUInputTextureEnum.FU_ADM_FLAG_COMMON_TEXTURE, srcFrame.texture.textureId)
+                renderConfig.apply {
+                    externalInputType = FUExternalInputEnum.EXTERNAL_INPUT_TYPE_CAMERA
+                    inputOrientation = 180
+                    cameraFacing = CameraFacingEnum.CAMERA_FRONT
+                    inputTextureMatrix = FUTransformMatrixEnum.CCROT0_FLIPVERTICAL
+                    inputBufferMatrix = FUTransformMatrixEnum.CCROT0_FLIPVERTICAL
+                    outputMatrix = FUTransformMatrixEnum.CCROT0
+                    deviceOrientation = this@FUVideoProcessor.deviceOrientation
                 }
+            }
         val output: FURenderOutputData = FURenderKit.getInstance().renderWithInput(input)
         dstFrame!!.width = output.texture!!.width
         dstFrame.height = output.texture!!.height

@@ -277,7 +277,7 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
         .getGroupMemberList(
             groupID: mRoomId!,
             filter: GroupMemberFilterType.V2TIM_GROUP_MEMBER_FILTER_ALL,
-            nextSeq: nextSeq.toString());
+            nextSeq: nextSeq);
     if (memberRes.code != 0) {
       return UserListCallback(code: memberRes.code, desc: memberRes.desc);
     }
@@ -293,7 +293,7 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
     return UserListCallback(
         code: 0,
         desc: 'get member list success',
-        nextSeq: int.parse(memberRes.data!.nextSeq!),
+        nextSeq: memberRes.data!.nextSeq!,
         list: newInfo);
   }
 

@@ -333,7 +333,7 @@ class TRTCChatSalonImpl extends TRTCChatSalon {
         .getGroupMemberList(
             groupID: mRoomId!,
             filter: GroupMemberFilterType.V2TIM_GROUP_MEMBER_FILTER_ALL,
-            nextSeq: nextSeq.toString());
+            nextSeq: nextSeq);
     if (memberRes.code != 0) {
       return MemberListCallback(code: memberRes.code, desc: memberRes.desc);
     }
@@ -349,7 +349,7 @@ class TRTCChatSalonImpl extends TRTCChatSalon {
     return MemberListCallback(
         code: 0,
         desc: 'get member list success',
-        nextSeq: int.parse(memberRes.data!.nextSeq!),
+        nextSeq: memberRes.data!.nextSeq!,
         list: newInfo);
   }
 
