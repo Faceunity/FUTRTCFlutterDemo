@@ -6,6 +6,8 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.Log
+import com.example.faceunity_plugin.data.BundlePathConfig
+import com.example.faceunity_plugin.utils.FuDeviceUtils
 import com.faceunity.core.callback.OperateCallback
 import com.faceunity.core.entity.FURenderInputData
 import com.faceunity.core.entity.FURenderOutputData
@@ -13,9 +15,10 @@ import com.faceunity.core.enumeration.CameraFacingEnum
 import com.faceunity.core.enumeration.FUExternalInputEnum
 import com.faceunity.core.enumeration.FUInputTextureEnum
 import com.faceunity.core.enumeration.FUTransformMatrixEnum
+import com.faceunity.core.faceunity.FUAIKit
 import com.faceunity.core.faceunity.FURenderKit
 import com.faceunity.core.faceunity.FURenderManager
-import com.faceunity.core.utils.FULogger
+import com.faceunity.core.model.facebeauty.FaceBeautyBlurTypeEnum
 import com.tencent.trtc.TRTCCloudDef
 import com.tencent.trtc.TRTCCloudListener
 import kotlin.math.abs
@@ -24,31 +27,24 @@ import kotlin.math.abs
  * @description
  * @author Qinyu on 2021-11-05
  */
-class FUVideoProcessor(application: Context) : TRTCCloudListener.TRTCVideoFrameListener {
+class FUVideoProcessor(application: Context, renderListener: RenderListener?) : TRTCCloudListener.TRTCVideoFrameListener {
     /**传感器**/
     private var mSensorManager: SensorManager
     private var mSensor: Sensor
     private var deviceOrientation = 90//手机设备朝向
+    private var renderListener: RenderListener? = null
 
     init {
-        FURenderManager.registerFURender(application, authpack.A(), object : OperateCallback {
-            override fun onSuccess(code: Int, msg: String) {
-                Log.d("registerFURender", "success:$msg")
-            }
-
-            override fun onFail(errCode: Int, errMsg: String) {
-                Log.e("registerFURender", "errCode:$errCode   errMsg:$errMsg")
-            }
-        })
-        FURenderManager.setKitDebug(FULogger.LogLevel.DEBUG)
         mSensorManager = application.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        this.renderListener = renderListener
     }
 
 
     override fun onGLContextCreated() {
         mSensorManager.registerListener(mSensorEventListener, mSensor, SensorManager.SENSOR_DELAY_NORMAL)
         FURenderKit.getInstance().setUseTexAsync(true)
+        renderListener?.onGLContextCreated()
     }
 
     /**
@@ -56,6 +52,12 @@ class FUVideoProcessor(application: Context) : TRTCCloudListener.TRTCVideoFrameL
      * dstFrame	用于接收第三方美颜处理过的视频画面
      */
     override fun onProcessVideoFrame(srcFrame: TRTCCloudDef.TRTCVideoFrame?, dstFrame: TRTCCloudDef.TRTCVideoFrame?): Int {
+
+        if (BundlePathConfig.DEVICE_LEVEL > FuDeviceUtils.DEVICE_LEVEL_MID) {
+            //高性能设备
+            cheekFaceNum()
+        }
+
         val input : FURenderInputData = FURenderInputData(srcFrame!!.width, srcFrame.height)
             .apply {
                 texture = FURenderInputData.FUTexture(FUInputTextureEnum.FU_ADM_FLAG_COMMON_TEXTURE, srcFrame.texture.textureId)
@@ -81,6 +83,28 @@ class FUVideoProcessor(application: Context) : TRTCCloudListener.TRTCVideoFrameL
         mSensorManager.unregisterListener(mSensorEventListener)
     }
 
+    private fun cheekFaceNum() {
+        //根据有无人脸 + 设备性能 判断开启的磨皮类型
+        val faceProcessorGetConfidenceScore = FUAIKit.getInstance().getFaceProcessorGetConfidenceScore(0)
+        if (faceProcessorGetConfidenceScore >= 0.95) {
+            //高端手机并且检测到人脸开启均匀磨皮，人脸点位质
+
+            FURenderKit.getInstance().faceBeauty?.let {
+                if (it.blurType != FaceBeautyBlurTypeEnum.EquallySkin) {
+                    it.blurType = FaceBeautyBlurTypeEnum.EquallySkin
+                    it.enableBlurUseMask = true
+                }
+            }
+        } else {
+            FURenderKit.getInstance().faceBeauty?.let {
+                if (it.blurType != FaceBeautyBlurTypeEnum.FineSkin) {
+                    it.blurType = FaceBeautyBlurTypeEnum.FineSkin
+                    it.enableBlurUseMask = false
+                }
+            }
+        }
+    }
+
     /**
      * 内置陀螺仪
      */
@@ -100,5 +124,9 @@ class FUVideoProcessor(application: Context) : TRTCCloudListener.TRTCVideoFrameL
                 }
             }
         }
+    }
+
+    fun interface RenderListener {
+        fun onGLContextCreated()
     }
 }

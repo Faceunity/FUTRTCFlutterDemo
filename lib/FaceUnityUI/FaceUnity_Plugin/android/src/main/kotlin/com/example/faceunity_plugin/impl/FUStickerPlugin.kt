@@ -35,8 +35,10 @@ class FUStickerPlugin {
         }
     }
 
-    private fun config() {
-        propDataFactory = PropDataFactory(0)
+    fun config() {
+        if (propDataFactory == null) {
+            propDataFactory = PropDataFactory(0)
+        }
         propDataFactory?.config()
     }
 

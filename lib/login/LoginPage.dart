@@ -27,12 +27,12 @@ class LoginPageState extends State<LoginPage> {
   String userId = '';
 
   login(context) async {
-    if ((await Permission.camera.request().isGranted &&
-        await Permission.microphone.request().isGranted)) {
-    } else {
-      TxUtils.showErrorToast('需要获取音视频权限才能进入', context);
-      return;
-    }
+    // if ((await Permission.camera.request().isGranted &&
+    //     await Permission.microphone.request().isGranted)) {
+    // } else {
+    //   TxUtils.showErrorToast('需要获取音视频权限才能进入', context);
+    //   return;
+    // }
     if (userId == '') {
       TxUtils.showErrorToast(Languages.of(context)!.errorUserIDInput, context);
       return;
@@ -126,11 +126,10 @@ class LoginPageState extends State<LoginPage> {
                 child: Row(
                   children: <Widget>[
                     Expanded(
-                      child: RaisedButton(
-                        padding: EdgeInsets.all(15.0),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor,
+                        padding: EdgeInsets.all(15.0),textStyle: TextStyle(color: Colors.white)),
                         child: Text(Languages.of(context)!.login),
-                        color: Theme.of(context).primaryColor,
-                        textColor: Colors.white,
                         onPressed: () => login(context),
                       ),
                     ),

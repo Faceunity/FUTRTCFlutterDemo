@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:tencent_im_sdk_plugin/enum/log_level_enum.dart';
+import 'package:tencent_im_sdk_plugin/enum/message_priority_enum.dart';
 import 'package:tencent_trtc_cloud/trtc_cloud.dart';
 import 'package:tencent_trtc_cloud/trtc_cloud_def.dart';
 import 'package:tencent_trtc_cloud/trtc_cloud_listener.dart';
@@ -6,7 +8,6 @@ import 'package:tencent_trtc_cloud/tx_device_manager.dart';
 import 'package:tencent_trtc_cloud/tx_beauty_manager.dart';
 import 'package:tencent_im_sdk_plugin/tencent_im_sdk_plugin.dart';
 import 'package:tencent_im_sdk_plugin/enum/group_add_opt_type.dart';
-import 'package:tencent_im_sdk_plugin/enum/log_level.dart';
 import 'package:tencent_im_sdk_plugin/enum/message_priority.dart';
 import 'package:tencent_im_sdk_plugin/enum/V2TimGroupListener.dart';
 import 'package:tencent_im_sdk_plugin/enum/V2TimSDKListener.dart';
@@ -74,7 +75,7 @@ class TRTCMeetingImpl extends TRTCMeeting {
   @override
   void registerListener(MeetingListenerFunc func) {
     if (listeners.isEmpty) {
-      timManager.setGroupListener(listener: groupListener());
+      timManager.addGroupListener(listener: groupListener());
       timManager.addSimpleMsgListener(listener: simpleMsgListener());
       mTRTCCloud.registerListener(rtcListener);
     }
@@ -89,6 +90,7 @@ class TRTCMeetingImpl extends TRTCMeeting {
     if (listeners.isEmpty) {
       mTRTCCloud.unRegisterListener(rtcListener);
       timManager.removeSimpleMsgListener();
+      timManager.removeGroupListener();
     }
   }
 
@@ -102,7 +104,7 @@ class TRTCMeetingImpl extends TRTCMeeting {
     if (!mIsInitIMSDK) {
       V2TimValueCallback<bool> initRes = await timManager.initSDK(
           sdkAppID: sdkAppId,
-          loglevel: LogLevel.V2TIM_LOG_ERROR,
+          loglevel: LogLevelEnum.V2TIM_LOG_ERROR,
           listener: new V2TimSDKListener(onKickedOffline: () {
             TRTCMeetingDelegate type = TRTCMeetingDelegate.onKickedOffline;
             emitEvent(type, {});
@@ -204,6 +206,8 @@ class TRTCMeetingImpl extends TRTCMeeting {
     if (code == 0 || code == 10013) {
       mRoomId = roomId.toString();
       mIsEnterMeeting = true;
+      mTRTCCloud.callExperimentalAPI(
+          "{\"api\": \"setFramework\", \"params\": {\"framework\": 7, \"component\": 5}}");
       mTRTCCloud.enterRoom(
         TRTCParams(
           sdkAppId: mSdkAppId,
@@ -260,7 +264,7 @@ class TRTCMeetingImpl extends TRTCMeeting {
     if (joinRes.code == 0 || joinRes.code == 10013) {
       mRoomId = roomId.toString();
       mIsEnterMeeting = true;
-      mTRTCCloud.enterRoom(
+      await mTRTCCloud.enterRoom(
         TRTCParams(
           sdkAppId: mSdkAppId,
           userId: mUserId,
@@ -270,6 +274,8 @@ class TRTCMeetingImpl extends TRTCMeeting {
         ),
         TRTCCloudDef.TRTC_APP_SCENE_VIDEOCALL,
       );
+      mTRTCCloud.callExperimentalAPI(
+          "{\"api\": \"setFramework\", \"params\": {\"framework\": 7, \"component\": 5}}");
 
       V2TimValueCallback<List<V2TimGroupInfoResult>> res = await timManager
           .getGroupManager()
@@ -336,7 +342,7 @@ class TRTCMeetingImpl extends TRTCMeeting {
 
   @override
   Future<void> updateRemoteView(int viewId, int streamType, String userId) {
-    return mTRTCCloud.updateRemoteView(viewId, streamType, userId);
+    return mTRTCCloud.updateRemoteView(userId, streamType, viewId);
   }
 
   @override
@@ -478,13 +484,13 @@ class TRTCMeetingImpl extends TRTCMeeting {
       int videoResolutionMode = 1,
       String appGroup = ''}) {
     return mTRTCCloud.startScreenCapture(
-      TRTCVideoEncParam(
-          videoFps: videoFps,
-          videoBitrate: videoBitrate,
-          videoResolution: videoResolution,
-          videoResolutionMode: videoResolutionMode),
-      appGroup,
-    );
+        TRTCCloudDef.TRTC_VIDEO_STREAM_TYPE_BIG,
+        TRTCVideoEncParam(
+            videoFps: videoFps,
+            videoBitrate: videoBitrate,
+            videoResolution: videoResolution,
+            videoResolutionMode: videoResolutionMode),
+        appGroup: appGroup);
   }
 
   @override
@@ -538,7 +544,7 @@ class TRTCMeetingImpl extends TRTCMeeting {
         'action': customCmd,
       }),
       groupID: mRoomId.toString(),
-      priority: MessagePriority.V2TIM_PRIORITY_LOW,
+      priority: MessagePriorityEnum.V2TIM_PRIORITY_LOW,
     );
     if (res.code == 0) {
       return ActionCallback(code: 0, desc: 'Send room message success.');

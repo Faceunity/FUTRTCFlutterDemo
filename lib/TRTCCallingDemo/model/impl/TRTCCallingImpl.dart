@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:localstream/localstream.dart';
 import 'package:tencent_im_sdk_plugin/enum/V2TimSDKListener.dart';
 import 'package:tencent_im_sdk_plugin/enum/V2TimSignalingListener.dart';
+import 'package:tencent_im_sdk_plugin/enum/log_level_enum.dart';
 import 'package:tencent_im_sdk_plugin/models/v2_tim_callback.dart';
 import 'package:tencent_trtc_cloud/tx_beauty_manager.dart';
 
@@ -19,7 +21,6 @@ import 'package:tencent_trtc_cloud/tx_device_manager.dart';
 //im sdk
 import 'package:tencent_im_sdk_plugin/tencent_im_sdk_plugin.dart';
 import 'package:tencent_im_sdk_plugin/models/v2_tim_value_callback.dart';
-import 'package:tencent_im_sdk_plugin/enum/log_level.dart';
 import 'package:tencent_im_sdk_plugin/manager/v2_tim_manager.dart';
 
 class TRTCCallingImpl extends TRTCCalling {
@@ -70,6 +71,7 @@ class TRTCCallingImpl extends TRTCCalling {
   String mRole = "audience"; //默认为观众，archor为主播
   late V2TIMManager timManager;
   late TRTCCloud mTRTCCloud;
+  late Localstream localStream;
   late TXAudioEffectManager txAudioManager;
   late TXDeviceManager txDeviceManager;
   Set<VoiceListenerFunc> listeners = Set();
@@ -84,6 +86,7 @@ class TRTCCallingImpl extends TRTCCalling {
     mTRTCCloud = (await TRTCCloud.sharedInstance())!;
     txDeviceManager = mTRTCCloud.getDeviceManager();
     txAudioManager = mTRTCCloud.getAudioEffectManager();
+    localStream = Localstream();
   }
 
   static sharedInstance() {
@@ -125,9 +128,7 @@ class TRTCCallingImpl extends TRTCCalling {
     listeners.remove(func);
     if (listeners.isEmpty) {
       mTRTCCloud.unRegisterListener(rtcListener);
-      timManager
-          .getSignalingManager()
-          .removeSignalingListener(listener: signalingListener);
+      timManager.getSignalingManager().removeSignalingListener();
     }
   }
 
@@ -137,7 +138,7 @@ class TRTCCallingImpl extends TRTCCalling {
     }
   }
 
-  signalingListener() {
+  V2TimSignalingListener signalingListener() {
     TRTCCallingDelegate type;
     return new V2TimSignalingListener(
       onInvitationCancelled: (inviteID, inviter, data) {
@@ -317,12 +318,11 @@ class TRTCCallingImpl extends TRTCCalling {
       // 当没有其他用户在房间里了，则结束通话。
       if (!_isEmpty(leaveUser)) {
         Map<String, dynamic> customMap = _getCustomMap();
-        //customMap['call_end'] = 'call_end';
+        // customMap['call_end'] = 'call_end';
         customMap['call_end'] = 10;
         if (_isEmpty(mCurGroupId)) {
-          timManager
-              .getSignalingManager()
-              .invite(invitee: leaveUser!, data: jsonEncode(customMap));
+          timManager.getSignalingManager().invite(
+              invitee: leaveUser!, data: jsonEncode(customMap), timeout: 0);
         } else {
           timManager.getSignalingManager().inviteInGroup(
               groupID: mCurGroupId,
@@ -347,7 +347,7 @@ class TRTCCallingImpl extends TRTCCalling {
       //初始化SDK
       V2TimValueCallback<bool> initRes = await timManager.initSDK(
           sdkAppID: sdkAppId, //填入在控制台上申请的sdkappid
-          loglevel: LogLevel.V2TIM_LOG_ERROR,
+          loglevel: LogLevelEnum.V2TIM_LOG_ERROR,
           listener: new V2TimSDKListener(onKickedOffline: () {
             TRTCCallingDelegate type = TRTCCallingDelegate.onKickedOffline;
             emitEvent(type, {});
@@ -430,7 +430,7 @@ class TRTCCallingImpl extends TRTCCalling {
   /*
   * trtc 进房
   */
-  _enterTRTCRoom() {
+  _enterTRTCRoom() async {
     isOnCalling = true;
     if (mCurCallType == TRTCCalling.typeVideoCall) {
       // 开启基础美颜
@@ -441,7 +441,7 @@ class TRTCCallingImpl extends TRTCCalling {
       // 进房前需要设置一下关键参数
       TRTCVideoEncParam encParam = new TRTCVideoEncParam();
       encParam.videoResolution = TRTCCloudDef.TRTC_VIDEO_RESOLUTION_960_540;
-      encParam.videoFps = 30;
+      encParam.videoFps = 15;
       encParam.videoBitrate = 1000;
       encParam.videoResolutionMode =
           TRTCCloudDef.TRTC_VIDEO_RESOLUTION_MODE_PORTRAIT;
@@ -453,6 +453,8 @@ class TRTCCallingImpl extends TRTCCalling {
     txDeviceManager.setAudioRoute(TRTCCloudDef.TRTC_AUDIO_ROUTE_SPEAKER);
     mTRTCCloud.muteLocalAudio(false);
     mTRTCCloud.startLocalAudio(TRTCCloudDef.TRTC_AUDIO_QUALITY_DEFAULT);
+    mTRTCCloud.callExperimentalAPI(
+        "{\"api\": \"setFramework\", \"params\": {\"framework\": 7, \"component\": 3}}");
     mTRTCCloud.enterRoom(
         TRTCParams(
             sdkAppId: mSdkAppId,
@@ -632,7 +634,7 @@ class TRTCCallingImpl extends TRTCCalling {
 
   @override
   Future<void> updateRemoteView(String userId, int streamType, int viewId) {
-    return mTRTCCloud.updateRemoteView(viewId, streamType, userId);
+    return mTRTCCloud.updateRemoteView(userId, streamType, viewId);
   }
 
   @override
@@ -643,13 +645,13 @@ class TRTCCallingImpl extends TRTCCalling {
   @override
   Future<int?> setLocalVideoRenderListener(
       String userId, bool isFront, int streamType, int width, int height) {
-    var param = CustomLocalRender(
-        userId: userId,
-        isFront: isFront,
-        streamType: streamType,
-        width: width,
-        height: height);
-    return mTRTCCloud.setLocalVideoRenderListener(param);
+    // var param = CustomLocalRender(
+    //     userId: userId,
+    //     isFront: isFront,
+    //     streamType: streamType,
+    //     width: width,
+    //     height: height);
+    return localStream.setLocalStream(isFront);
   }
 
   _generateRoomID() {

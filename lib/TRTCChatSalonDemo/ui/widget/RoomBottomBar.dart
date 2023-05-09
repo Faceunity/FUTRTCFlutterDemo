@@ -1,7 +1,7 @@
+import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import '../base/UserEnum.dart';
 import 'package:trtc_scenes_demo/utils/TxUtils.dart';
-import 'package:badges/badges.dart';
 import '../../../i10n/localization_intl.dart';
 
 class RaiseHandInfo {
@@ -230,9 +230,10 @@ class _RoomBottomBarState extends State<RoomBottomBar> {
               child: Padding(
                 padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                 // ignore: deprecated_member_use
-                child: FlatButton(
-                  minWidth: 144,
-                  color: Color.fromRGBO(0, 98, 227, 1),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Color.fromRGBO(0, 98, 227, 1),
+                      minimumSize: Size.fromWidth(144)),
                   child: Text(
                     Languages.of(context)!.leaveTips,
                     style: TextStyle(
@@ -260,10 +261,6 @@ class _RoomBottomBarState extends State<RoomBottomBar> {
                         },
                         child: validRaiseHandCount > 0
                             ? Badge(
-                                position: BadgePosition.topStart(),
-                                badgeContent: Text(
-                                  validRaiseHandCount.toString(),
-                                ),
                                 child: Image.asset(
                                   secondBtnUrl,
                                   width: 48.0,

@@ -186,19 +186,18 @@ class _TRTCCallingContactState extends State<TRTCCallingContact> {
                     ),
                     Container(
                       // ignore: deprecated_member_use
-                      child: RaisedButton(
-                        color: Colors.green,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.green, shape: RoundedRectangleBorder(
+                          side: BorderSide.none,
+                          borderRadius: BorderRadius.all(Radius.circular(20)),
+                        ),),
                         onPressed: () {
                           onCallClick(userInfo);
                         },
                         child: Text(
                           '呼叫',
                           style: TextStyle(fontSize: 16.0, color: Colors.white),
-                        ),
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide.none,
-                          borderRadius: BorderRadius.all(Radius.circular(20)),
-                        ),
+                        )
                       ),
                     )
                   ],
@@ -244,12 +243,12 @@ class _TRTCCallingContactState extends State<TRTCCallingContact> {
         Container(
           margin: EdgeInsets.only(right: 20),
           // ignore: deprecated_member_use
-          child: RaisedButton(
-            color: Color.fromRGBO(0, 110, 255, 1.000),
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Color.fromRGBO(0, 110, 255, 1.000),
             shape: RoundedRectangleBorder(
               side: BorderSide.none,
               borderRadius: BorderRadius.all(Radius.circular(20)),
-            ),
+            )),
             onPressed: () {
               onSearchClick();
             },

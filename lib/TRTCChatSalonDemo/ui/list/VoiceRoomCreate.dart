@@ -235,11 +235,9 @@ class VoiceRoomCreatePageState extends State<VoiceRoomCreatePage> {
                 child: Row(
                   children: <Widget>[
                     Expanded(
-                      child: RaisedButton(
-                        padding: EdgeInsets.all(15.0),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(padding: EdgeInsets.all(15.0),backgroundColor: Theme.of(context).primaryColor,textStyle: TextStyle(color: Colors.white)),
                         child: Text(Languages.of(context)!.startSalon),
-                        color: Theme.of(context).primaryColor,
-                        textColor: Colors.white,
                         onPressed: createVoiceRoom,
                       ),
                     ),

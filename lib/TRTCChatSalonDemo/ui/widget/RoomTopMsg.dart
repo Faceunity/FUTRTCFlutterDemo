@@ -33,8 +33,8 @@ class _RoomTopMessageState extends State<RoomTopMessage> {
                 margin: EdgeInsets.fromLTRB(0, 0, 30, 10),
                 height: 36,
                 // ignore: deprecated_member_use
-                child: FlatButton(
-                  color: Color.fromRGBO(15, 169, 104, 1.0),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Color.fromRGBO(15, 169, 104, 1.0),),
                   child: Text(
                     widget.okTitle!,
                     style: TextStyle(color: Colors.white),
@@ -56,7 +56,7 @@ class _RoomTopMessageState extends State<RoomTopMessage> {
                 ),
                 margin: EdgeInsets.fromLTRB(30, 0, 0, 10),
                 height: 36,
-                child: FlatButton(
+                child: ElevatedButton(
                   child: Text(
                     widget.cancelTitle!,
                     style: TextStyle(color: Colors.white),

@@ -2,9 +2,16 @@ package com.example.faceunity_plugin
 
 import android.util.Log
 import androidx.annotation.NonNull
+import com.example.faceunity_plugin.data.BundlePathConfig
 import com.example.faceunity_plugin.impl.FUBeautyPlugin
 import com.example.faceunity_plugin.impl.FUMakeupPlugin
 import com.example.faceunity_plugin.impl.FUStickerPlugin
+import com.faceunity.core.enumeration.FUAITypeEnum
+import com.example.faceunity_plugin.utils.FuDeviceUtils
+import com.faceunity.core.callback.OperateCallback
+import com.faceunity.core.faceunity.FUAIKit
+import com.faceunity.core.faceunity.FURenderManager
+import com.faceunity.core.utils.FULogger
 import com.tencent.trtc.TRTCCloud
 import com.tencent.trtc.TRTCCloudDef
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -36,11 +43,39 @@ class FaceunityPlugin : FlutterPlugin, MethodCallHandler {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "faceunity_plugin")
         channel.setMethodCallHandler(this)
 
+        BundlePathConfig.DEVICE_LEVEL = FuDeviceUtils.judgeDeviceLevelGPU()
+        if (BundlePathConfig.DEVICE_LEVEL < 0) {
+            BundlePathConfig.DEVICE_LEVEL = 0
+        }
+
+        FURenderManager.setKitDebug(FULogger.LogLevel.TRACE)
+        FURenderManager.registerFURender(flutterPluginBinding.applicationContext, authpack.A(), object : OperateCallback {
+            override fun onFail(errCode: Int, errMsg: String) {
+                Log.e("registerFURender", "errCode: $errCode   errMsg: $errMsg")
+            }
+
+            override fun onSuccess(code: Int, msg: String) {
+                Log.d("registerFURender", "success:$msg")
+
+                FUAIKit.getInstance().loadAIProcessor(BundlePathConfig.BUNDLE_AI_FACE, FUAITypeEnum.FUAITYPE_FACEPROCESSOR)
+                //高端机开启小脸检测
+                FUAIKit.getInstance().faceProcessorSetFaceLandmarkQuality(BundlePathConfig.DEVICE_LEVEL)
+                if (BundlePathConfig.DEVICE_LEVEL > FuDeviceUtils.DEVICE_LEVEL_MID) {
+                    FUAIKit.getInstance().fuFaceProcessorSetDetectSmallFace(true)
+                }
+            }
+        })
+
         trtcCloud = TRTCCloud.sharedInstance(flutterPluginBinding.applicationContext)
         trtcCloud.setLocalVideoProcessListener(
             TRTCCloudDef.TRTC_VIDEO_PIXEL_FORMAT_Texture_2D,
             TRTCCloudDef.TRTC_VIDEO_BUFFER_TYPE_TEXTURE,
-            FUVideoProcessor(flutterPluginBinding.applicationContext)
+            FUVideoProcessor(flutterPluginBinding.applicationContext) {
+                //当前腾讯的trtc sdk在接通的时候会调用 onGLContextDestory 回调，处理一下
+                fuBeautyPlugin.config()
+                fuStickerPlugin.config()
+                fuMakeupPlugin.config()
+            }
         )
     }
 
@@ -59,7 +94,7 @@ class FaceunityPlugin : FlutterPlugin, MethodCallHandler {
                 fuMakeupPlugin.methodCall(this, call, result)
             }
             viewModelManagerPlugin -> {
-                methodCall(call)
+                methodCall(call, result)
             }
             else -> result.notImplemented()
         }
@@ -70,7 +105,7 @@ class FaceunityPlugin : FlutterPlugin, MethodCallHandler {
         channel.setMethodCallHandler(null)
     }
 
-    private fun methodCall(call: MethodCall) {
+    private fun methodCall(call: MethodCall, @NonNull result: Result) {
         val arguments = call.arguments as? Map<*, *>?
         Log.i("faceunity", "methodCall: ${arguments?.get("method") as String?}")
         when (arguments?.get("method") as String?) {
@@ -83,6 +118,7 @@ class FaceunityPlugin : FlutterPlugin, MethodCallHandler {
                 val isOn = arguments["value"] as Boolean
                 fuBeautyPlugin.switchOn(isOn, bizType)
             }
+            "getPerformanceLevel" -> result.success(BundlePathConfig.DEVICE_LEVEL)
         }
     }
 }

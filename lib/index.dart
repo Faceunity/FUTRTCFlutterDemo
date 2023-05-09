@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import './utils/TxUtils.dart';
-// import 'base/DemoSevice.dart';
 import 'utils/constants.dart' as constants;
 import './debug/GenerateTestUserSig.dart';
 import './TRTCChatSalonDemo/model/TRTCChatSalon.dart';
@@ -39,7 +38,6 @@ class IndexPageState extends State<IndexPage> {
         GenerateTestUserSig.genTestSig(userId),
       );
     }
-    // DemoSevice.sharedInstance().start();
   }
 
   Future<bool?>? logout() {
@@ -51,17 +49,16 @@ class IndexPageState extends State<IndexPage> {
           content: Text(Languages.of(context)!.logoutContent),
           actions: <Widget>[
             // ignore: deprecated_member_use
-            FlatButton(
+            ElevatedButton(
               child: Text(Languages.of(context)!.cancelText),
               onPressed: () => Navigator.of(context).pop(), // 关闭对话框
             ),
             // ignore: deprecated_member_use
-            FlatButton(
+            ElevatedButton(
               child: Text(Languages.of(context)!.okText),
               onPressed: () {
                 //关闭对话框并返回true
                 trtcVoiceRoom.logout();
-                //TRTCChatSalon.destroySharedInstance();
                 TxUtils.setStorageByKey(constants.USERID_KEY, '');
                 Navigator.popAndPushNamed(
                   context,

@@ -24,7 +24,7 @@ class FUMakeupPlugin {
     fun methodCall(plugin: FaceunityPlugin, call: MethodCall, result: MethodChannel.Result){
         val arguments = call.arguments as? Map<*, *>?
         val method = arguments?.get("method") as String?
-        Log.i("sticker", "methodCall: $arguments")
+        Log.i("makeup", "methodCall: $arguments")
         when(method) {
             "config" -> config()
             "dispose" -> dispose()
@@ -44,8 +44,10 @@ class FUMakeupPlugin {
         makeupDataFactory?.sliderValueChange(index, value)
     }
 
-    private fun config() {
-        makeupDataFactory = MakeupDataFactory(0)
+    fun config() {
+        if (makeupDataFactory == null) {
+            makeupDataFactory = MakeupDataFactory(0)
+        }
         makeupDataFactory?.config()
     }
 

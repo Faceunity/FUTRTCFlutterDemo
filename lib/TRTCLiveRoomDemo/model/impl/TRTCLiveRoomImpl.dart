@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'package:tencent_im_sdk_plugin/enum/V2TimGroupListener.dart';
 import 'package:tencent_im_sdk_plugin/enum/V2TimSimpleMsgListener.dart';
 import 'package:tencent_im_sdk_plugin/enum/group_add_opt_type.dart';
-import 'package:tencent_im_sdk_plugin/enum/group_member_filter_type.dart';
+import 'package:tencent_im_sdk_plugin/enum/group_member_filter_enum.dart';
+import 'package:tencent_im_sdk_plugin/enum/log_level_enum.dart';
 import 'package:tencent_im_sdk_plugin/enum/message_priority.dart';
+import 'package:tencent_im_sdk_plugin/enum/message_priority_enum.dart';
 import 'package:tencent_im_sdk_plugin/models/v2_tim_group_info.dart';
 import 'package:tencent_im_sdk_plugin/models/v2_tim_group_info_result.dart';
 import 'package:tencent_im_sdk_plugin/models/v2_tim_group_member_full_info.dart';
@@ -25,7 +27,6 @@ import 'package:tencent_trtc_cloud/tx_device_manager.dart';
 //im sdk
 import 'package:tencent_im_sdk_plugin/tencent_im_sdk_plugin.dart';
 import 'package:tencent_im_sdk_plugin/models/v2_tim_value_callback.dart';
-import 'package:tencent_im_sdk_plugin/enum/log_level.dart';
 import 'package:tencent_im_sdk_plugin/manager/v2_tim_manager.dart';
 import 'package:tencent_im_sdk_plugin/enum/V2TimSDKListener.dart';
 import 'package:tencent_im_sdk_plugin/enum/V2TimSignalingListener.dart';
@@ -64,7 +65,7 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
   String mCurPKCallID = "";
   bool isPk = false;
   late int mOriginRole;
-  TRTCLiveRoomConfig? mRoomConfig;
+  late TRTCLiveRoomConfig mRoomConfig;
   // List<IMAnchorInfo> mAnchorList = [];
   List<String> mAnchorList = [];
   List<String> mAudienceList = [];
@@ -146,6 +147,8 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
       mRoomId = roomId.toString();
       mIsEnterRoom = true;
       mOriginRole = TRTCCloudDef.TRTCRoleAnchor;
+      mTRTCCloud.callExperimentalAPI(
+          "{\"api\": \"setFramework\", \"params\": {\"framework\": 7, \"component\": 4}}");
       mTRTCCloud.enterRoom(
           TRTCParams(
               sdkAppId: mSdkAppId, //应用Id
@@ -154,6 +157,7 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
               role: TRTCCloudDef.TRTCRoleAnchor,
               roomId: roomId),
           TRTCCloudDef.TRTC_APP_SCENE_LIVE);
+
       // 默认打开麦克风
       // await enableAudioVolumeEvaluation(true);
       if (roomParam.quality != null) {
@@ -195,6 +199,7 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
     mCurCallID = "";
     mCurPKCallID = "";
     mAnchorList = [];
+    mAudienceList = [];
   }
 
   @override
@@ -213,14 +218,20 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
       mRoomId = roomId.toString();
       mIsEnterRoom = true;
       mOriginRole = TRTCCloudDef.TRTCRoleAudience;
-      mTRTCCloud.enterRoom(
-          TRTCParams(
-              sdkAppId: mSdkAppId, //应用Id
-              userId: mUserId, // 用户Id
-              userSig: mUserSig, // 用户签名
-              role: TRTCCloudDef.TRTCRoleAudience,
-              roomId: roomId),
-          TRTCCloudDef.TRTC_APP_SCENE_LIVE);
+      mTRTCCloud.callExperimentalAPI(
+          "{\"api\": \"setFramework\", \"params\": {\"framework\": 7, \"component\": 4}}");
+
+      if (!mRoomConfig.useCDNFirst) {
+        await mTRTCCloud.enterRoom(
+            TRTCParams(
+                sdkAppId: mSdkAppId, //应用Id
+                userId: mUserId, // 用户Id
+                userSig: mUserSig, // 用户签名
+                role: TRTCCloudDef.TRTCRoleAudience,
+                roomId: roomId),
+            TRTCCloudDef.TRTC_APP_SCENE_LIVE);
+      }
+
       V2TimValueCallback<List<V2TimGroupInfoResult>> res = await timManager
           .getGroupManager()
           .getGroupsInfo(groupIDList: [roomId.toString()]);
@@ -270,14 +281,12 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
 
   @override
   Future<UserListCallback> getRoomMemberList(int nextSeq) async {
-    print("==nextSeq=" + nextSeq.toString());
-    print("==mRoomId=" + mRoomId.toString());
     V2TimValueCallback<V2TimGroupMemberInfoResult> memberRes = await timManager
         .getGroupManager()
         .getGroupMemberList(
             groupID: mRoomId!,
-            filter: GroupMemberFilterType.V2TIM_GROUP_MEMBER_FILTER_ALL,
-            nextSeq: nextSeq);
+            filter: GroupMemberFilterTypeEnum.V2TIM_GROUP_MEMBER_FILTER_ALL,
+            nextSeq: nextSeq.toString());
     if (memberRes.code != 0) {
       return UserListCallback(code: memberRes.code, desc: memberRes.desc);
     }
@@ -293,7 +302,7 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
     return UserListCallback(
         code: 0,
         desc: 'get member list success',
-        nextSeq: memberRes.data!.nextSeq!,
+        nextSeq: int.parse(memberRes.data!.nextSeq!),
         list: newInfo);
   }
 
@@ -309,8 +318,6 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
 
   @override
   Future<RoomInfoCallback> getRoomInfos(List<String> roomIdList) async {
-    print("==roomIdList=" + roomIdList.toString());
-
     V2TimValueCallback<List<V2TimGroupInfoResult>> res = await timManager
         .getGroupManager()
         .getGroupsInfo(groupIDList: roomIdList);
@@ -322,7 +329,6 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
 
     List<RoomInfo> newInfo = [];
     for (var i = 0; i < listInfo.length; i++) {
-      print(listInfo[i].toJson());
       if (listInfo[i].resultCode == 0) {
         //兼容获取不到群id信息的情况
         V2TimGroupInfo groupInfo = listInfo[i].groupInfo!;
@@ -362,7 +368,7 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
       //初始化SDK
       V2TimValueCallback<bool> initRes = await timManager.initSDK(
           sdkAppID: sdkAppId, //填入在控制台上申请的sdkappid
-          loglevel: LogLevel.V2TIM_LOG_ERROR,
+          loglevel: LogLevelEnum.V2TIM_LOG_ERROR,
           listener: new V2TimSDKListener(onKickedOffline: () {
             TRTCLiveRoomDelegate type = TRTCLiveRoomDelegate.onKickedOffline;
             emitEvent(type, {});
@@ -444,7 +450,7 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
       timManager
           .getSignalingManager()
           .addSignalingListener(listener: signalingListener());
-      timManager.setGroupListener(listener: groupListener());
+      timManager.addGroupListener(listener: groupListener());
       timManager.addSimpleMsgListener(
         listener: simpleMsgListener(),
       );
@@ -460,9 +466,8 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
     if (listeners.isEmpty) {
       mTRTCCloud.unRegisterListener(rtcListener);
       timManager.removeSimpleMsgListener();
-      timManager
-          .getSignalingManager()
-          .removeSignalingListener(listener: signalingListener);
+      timManager.removeGroupListener();
+      timManager.getSignalingManager().removeSignalingListener();
     }
   }
 
@@ -542,10 +547,6 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
       mAnchorList.remove(param['userId']);
       type = TRTCLiveRoomDelegate.onAnchorExit;
       emitEvent(type, param['userId']);
-    } else if (typeStr == "onDisconnectOtherRoom") {
-      print("==onDisconnectOtherRoom=" + param.toString());
-    } else if (typeStr == "onStartPublishing") {
-      print("==onStartPublishing=" + param.toString());
     }
   }
 
@@ -569,6 +570,9 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
         }
       },
       onMemberLeave: (String groupId, V2TimGroupMemberInfo member) {
+        if (mAudienceList.contains(member.userID)) {
+          mAudienceList.remove(member.userID);
+        }
         type = TRTCLiveRoomDelegate.onAudienceExit;
         emitEvent(type, {
           'userId': member.userID,
@@ -601,7 +605,6 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
         }
         try {
           Map<String, dynamic>? customMap = jsonDecode(data);
-          print("==customMap onInviteeRejected=" + customMap.toString());
           if (customMap == null) {
             print(logTag + "onReceiveNewInvitation extraMap is null, ignore");
             return;
@@ -628,7 +631,6 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
         }
         try {
           Map<String, dynamic>? customMap = jsonDecode(data);
-          print("==customMap onInviteeRejected=" + customMap.toString());
           if (customMap == null) {
             print(logTag + "onReceiveNewInvitation extraMap is null, ignore");
             return;
@@ -652,7 +654,6 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
           (inviteID, inviter, groupID, inviteeList, data) async {
         try {
           Map<String, dynamic>? customMap = jsonDecode(data);
-          print("==customMap=" + customMap.toString());
 
           if (customMap == null) {
             print(logTag + "onReceiveNewInvitation extraMap is null, ignore");
@@ -672,6 +673,7 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
                 "userId": inviter,
                 "userName": customMap['data']['cmdInfo']['userName'],
                 "userAvatar": customMap['data']['cmdInfo']['userAvatar'],
+                "callId": inviteID
               });
             }
           } else if (customMap.containsKey('data') &&
@@ -764,16 +766,15 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
   }
 
   @override
-  Future<ActionCallback> responseJoinAnchor(String userId, bool agree) async {
+  Future<ActionCallback> responseJoinAnchor(
+      String userId, bool agree, String callId) async {
     V2TimCallback res;
     if (agree) {
       res = await timManager.getSignalingManager().accept(
-          inviteID: mCurCallID,
-          data: jsonEncode(_getCustomMap(requestAnchorCMD)));
+          inviteID: callId, data: jsonEncode(_getCustomMap(requestAnchorCMD)));
     } else {
       res = await timManager.getSignalingManager().reject(
-          inviteID: mCurCallID,
-          data: jsonEncode(_getCustomMap(requestAnchorCMD)));
+          inviteID: callId, data: jsonEncode(_getCustomMap(requestAnchorCMD)));
     }
 
     return ActionCallback(code: res.code, desc: res.desc);
@@ -826,7 +827,7 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
               "action": liveCustomCmd
             }),
             groupID: mRoomId.toString(),
-            priority: MessagePriority.V2TIM_PRIORITY_LOW);
+            priority: MessagePriorityEnum.V2TIM_PRIORITY_NORMAL);
     if (res.code == 0) {
       return ActionCallback(code: 0, desc: "send group message success.");
     } else {
@@ -881,7 +882,7 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
   @override
   Future<void> updateRemoteView(String userId, int viewId) {
     return mTRTCCloud.updateRemoteView(
-        viewId, TRTCCloudDef.TRTC_VIDEO_STREAM_TYPE_BIG, userId);
+        userId, TRTCCloudDef.TRTC_VIDEO_STREAM_TYPE_BIG, viewId);
   }
 
   @override
@@ -891,6 +892,16 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
     }
     // 如果是观众，那么则切换到主播
     if (mOriginRole == TRTCCloudDef.TRTCRoleAudience) {
+      if (mRoomConfig.useCDNFirst) {
+        await mTRTCCloud.enterRoom(
+            TRTCParams(
+                sdkAppId: mSdkAppId, //应用Id
+                userId: mUserId, // 用户Id
+                userSig: mUserSig, // 用户签名
+                role: TRTCCloudDef.TRTCRoleAnchor,
+                roomId: int.parse(mRoomId!)),
+            TRTCCloudDef.TRTC_APP_SCENE_LIVE);
+      }
       mTRTCCloud.switchRole(TRTCCloudDef.TRTCRoleAnchor);
       // 观众切换到主播是小主播，小主播设置一下分辨率
       TRTCVideoEncParam param = new TRTCVideoEncParam();
@@ -938,10 +949,13 @@ class TRTCLiveRoomImpl extends TRTCLiveRoom {
 
   @override
   Future<void> stopPublish() async {
-    print("==stopPublish1=");
     mTRTCCloud.stopLocalAudio();
+    mTRTCCloud.stopLocalPreview();
     if (mOriginRole == TRTCCloudDef.TRTCRoleAudience) {
       mTRTCCloud.switchRole(TRTCCloudDef.TRTCRoleAudience);
+      if (mRoomConfig.useCDNFirst) {
+        mTRTCCloud.exitRoom();
+      }
     } else if (mOriginRole == TRTCCloudDef.TRTCRoleAnchor) {
       mTRTCCloud.exitRoom();
     }
