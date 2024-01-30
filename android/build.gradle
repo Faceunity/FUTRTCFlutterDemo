@@ -1,13 +1,11 @@
 buildscript {
-    ext.kotlin_version = '1.6.10'
     repositories {
         google()
         jcenter()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.1'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.android.tools.build:gradle:7.0.2'
     }
 }
 
@@ -15,6 +13,8 @@ allprojects {
     repositories {
         google()
         jcenter()
+        maven {url 'https://jitpack.io'}
+        maven { url 'https://maven.faceunity.com/repository/maven-public/' }
     }
 }
 
@@ -26,6 +26,6 @@ subprojects {
     project.evaluationDependsOn(':app')
 }
 
-task clean(type: Delete) {
+tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
