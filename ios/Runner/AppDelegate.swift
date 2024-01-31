@@ -52,6 +52,7 @@ extension TRTCVideoCustomPreprocessor: ITXCustomBeautyProcesser {
             let input = FURenderInput.init()
             input.texture = FUTexture(ID: srcFrame.textureId, size: CGSize(width: Double(srcFrame.width), height: Double(srcFrame.height)))
             input.renderConfig.gravityEnable = true
+            input.renderConfig.imageOrientation = FUImageOrientationDown
             input.renderConfig.isFromFrontCamera = true
             input.renderConfig.isFromMirroredCamera = true
             input.renderConfig.textureTransform = CCROT0_FLIPVERTICAL
