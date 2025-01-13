@@ -14,6 +14,10 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 /** FaceunityPlugin */
 class FaceunityPlugin : FlutterPlugin, MethodCallHandler{
@@ -29,7 +33,7 @@ class FaceunityPlugin : FlutterPlugin, MethodCallHandler{
     private val sensorHandler by lazy { SensorHandler() }
     private lateinit var context: Context
     private lateinit var fuVideoProcessor: FUVideoProcessor
-
+    private val mainScope = MainScope()
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "faceunity_plugin")
         channel.setMethodCallHandler(this)
@@ -55,6 +59,7 @@ class FaceunityPlugin : FlutterPlugin, MethodCallHandler{
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
         sensorHandler.unregister()
+        mainScope.cancel()
     }
 
     private fun methodCall(call: MethodCall, @NonNull result: Result) {
@@ -63,8 +68,8 @@ class FaceunityPlugin : FlutterPlugin, MethodCallHandler{
                 result.success("Android ${android.os.Build.VERSION.RELEASE}")
             }
 
-            "isHighPerformanceDevice" -> {
-                result.success(FaceunityKit.devicePerformanceLevel == FuDeviceUtils.DEVICE_LEVEL_HIGH)
+            "devicePerformanceLevel" -> {
+                result.success(FaceunityKit.devicePerformanceLevel)
             }
 
             "isNPUSupported" -> {
@@ -80,6 +85,7 @@ class FaceunityPlugin : FlutterPlugin, MethodCallHandler{
             }
             "setupRenderKit" -> setupRenderKit()
             "destoryRenderKit" -> destroyRenderKit()
+            "restrictedSkinParams" -> restrictedSkinParams(call, result)
         }
     }
 
@@ -105,5 +111,11 @@ class FaceunityPlugin : FlutterPlugin, MethodCallHandler{
     private fun destroyRenderKit() {
         FaceunityKit.releaseKit()
         fuVideoProcessor.enableRender(false)
+    }
+
+        private fun restrictedSkinParams(call: MethodCall, result: Result) {
+        mainScope.launch(Dispatchers.IO) {
+            result.success(RestrictedSkinTool.restrictedSkinParams)
+        }
     }
 }

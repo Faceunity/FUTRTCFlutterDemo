@@ -117,10 +117,10 @@
 			isa = PBXGroup;
 			children = (
 				6192ED68283F1F380027888F /* brightness.fsh */,
-				6192ED69283F1F380027888F /* TRTCVideoCustomPreprocessor.m */,
+				6192ED6C283F1F380027888F /* TRTCShaderCompiler.h */,
 				6192ED6A283F1F380027888F /* TRTCShaderCompiler.m */,
 				6192ED6B283F1F380027888F /* TRTCVideoCustomPreprocessor.h */,
-				6192ED6C283F1F380027888F /* TRTCShaderCompiler.h */,
+				6192ED69283F1F380027888F /* TRTCVideoCustomPreprocessor.m */,
 				6192ED6D283F1F380027888F /* vertexShader.vsh */,
 			);
 			path = ThirdBeauty;
@@ -258,7 +258,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1240;
-				LastUpgradeCheck = 1510;
+				LastUpgradeCheck = 1430;
 				ORGANIZATIONNAME = "";
 				TargetAttributes = {
 					97C146ED1CF9000F007C117D = {
@@ -323,21 +323,27 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources.sh",
-				"${PODS_ROOT}/FURenderKit/Resources/graphics/aitype.bundle",
-				"${PODS_ROOT}/FURenderKit/Resources/graphics/body_slim.bundle",
-				"${PODS_ROOT}/FURenderKit/Resources/graphics/controller_cpp.bundle",
-				"${PODS_ROOT}/FURenderKit/Resources/graphics/face_beautification.bundle",
-				"${PODS_ROOT}/FURenderKit/Resources/graphics/face_makeup.bundle",
-				"${PODS_ROOT}/FURenderKit/Resources/graphics/fuzzytoonfilter.bundle",
-				"${PODS_ROOT}/FURenderKit/Resources/graphics/fxaa.bundle",
-				"${PODS_ROOT}/FURenderKit/Resources/graphics/tongue.bundle",
-				"${PODS_ROOT}/FURenderKit/Resources/model/ai_face_processor.bundle",
-				"${PODS_ROOT}/FURenderKit/Resources/model/ai_hand_processor.bundle",
-				"${PODS_ROOT}/FURenderKit/Resources/model/ai_human_processor.bundle",
+				"${PODS_ROOT}/FURenderKit_flutter/FURenderKit_flutter/Resources/graphics/aitype.bundle",
+				"${PODS_ROOT}/FURenderKit_flutter/FURenderKit_flutter/Resources/graphics/armeshv2.bundle",
+				"${PODS_ROOT}/FURenderKit_flutter/FURenderKit_flutter/Resources/graphics/body_slim.bundle",
+				"${PODS_ROOT}/FURenderKit_flutter/FURenderKit_flutter/Resources/graphics/controller_cpp.bundle",
+				"${PODS_ROOT}/FURenderKit_flutter/FURenderKit_flutter/Resources/graphics/face_beautification.bundle",
+				"${PODS_ROOT}/FURenderKit_flutter/FURenderKit_flutter/Resources/graphics/face_makeup.bundle",
+				"${PODS_ROOT}/FURenderKit_flutter/FURenderKit_flutter/Resources/graphics/fuzzytoonfilter.bundle",
+				"${PODS_ROOT}/FURenderKit_flutter/FURenderKit_flutter/Resources/graphics/fxaa.bundle",
+				"${PODS_ROOT}/FURenderKit_flutter/FURenderKit_flutter/Resources/graphics/tongue.bundle",
+				"${PODS_ROOT}/FURenderKit_flutter/FURenderKit_flutter/Resources/model/ai_face_processor.bundle",
+				"${PODS_ROOT}/FURenderKit_flutter/FURenderKit_flutter/Resources/model/ai_face_processor_pc.bundle",
+				"${PODS_ROOT}/FURenderKit_flutter/FURenderKit_flutter/Resources/model/ai_hand_processor.bundle",
+				"${PODS_ROOT}/FURenderKit_flutter/FURenderKit_flutter/Resources/model/ai_hand_processor_pc.bundle",
+				"${PODS_ROOT}/FURenderKit_flutter/FURenderKit_flutter/Resources/model/ai_human_processor.bundle",
+				"${PODS_ROOT}/FURenderKit_flutter/FURenderKit_flutter/Resources/model/ai_human_processor_pc.bundle",
+				"${PODS_ROOT}/TXLiteAVSDK_Professional/TXLiteAVSDK_Professional/TXLiteAVSDK_Professional.xcframework/ios-arm64_armv7/TXLiteAVSDK_Professional.framework/TXLiteAVSDK_Professional.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/aitype.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/armeshv2.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/body_slim.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/controller_cpp.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/face_beautification.bundle",
@@ -346,8 +352,12 @@
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/fxaa.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/tongue.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ai_face_processor.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ai_face_processor_pc.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ai_hand_processor.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ai_hand_processor_pc.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ai_human_processor.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ai_human_processor_pc.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/TXLiteAVSDK_Professional.bundle",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -392,7 +402,7 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks.sh",
-				"${PODS_ROOT}/FURenderKit/FURenderKit.framework",
+				"${PODS_ROOT}/FURenderKit_flutter/FURenderKit_flutter/FURenderKit.framework",
 				"${BUILT_PRODUCTS_DIR}/Toast/Toast.framework",
 				"${BUILT_PRODUCTS_DIR}/faceunity_plugin/faceunity_plugin.framework",
 				"${BUILT_PRODUCTS_DIR}/fluttertoast/fluttertoast.framework",
@@ -542,9 +552,11 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = 35A6KD62ZJ;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 35A6KD62ZJ;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -627,6 +639,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.tencent.comm.trtc.demo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = FULiveDemo_dev;
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -749,9 +762,11 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = 35A6KD62ZJ;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 35A6KD62ZJ;
 				ENABLE_BITCODE = NO;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "arm64 i386";
 				FRAMEWORK_SEARCH_PATHS = (
@@ -835,6 +850,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.tencent.comm.trtc.demo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = FULiveDemo_dev;
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -850,9 +866,11 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = 35A6KD62ZJ;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 35A6KD62ZJ;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -935,6 +953,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.tencent.comm.trtc.demo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = FULiveDemo_dev;
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
