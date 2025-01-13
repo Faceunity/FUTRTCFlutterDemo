@@ -14,6 +14,7 @@ import 'package:faceunity_ui_flutter/modules/makeup/makeup_view.dart';
 import 'package:faceunity_ui_flutter/modules/shape/shape_view.dart';
 import 'package:faceunity_ui_flutter/modules/skin/skin_view.dart';
 import 'package:faceunity_ui_flutter/modules/sticker/sticker_view.dart';
+import 'package:faceunity_ui_flutter/util/common_util.dart';
 import 'package:faceunity_ui_flutter/util/faceunity_defines.dart';
 import 'package:flutter/material.dart';
 
@@ -39,11 +40,18 @@ class FaceunityWidget extends StatefulWidget {
 class FaceunityWidgetState extends State<FaceunityWidget> {
   // 当前选中的功能栏索引
   int selectedIndex = -1;
+  // 设备性能等级
+  late int _devicePerformanceLevel = DevicePerformanceLevel.levelTwo;
 
   @override
   void initState() {
     FaceunityPlugin.setupRenderKit();
     super.initState();
+    FaceunityPlugin.devicePerformanceLevel().then((value) => {
+      setState(() {
+        _devicePerformanceLevel = value;
+      })
+    });
   }
 
   @override
@@ -54,137 +62,147 @@ class FaceunityWidgetState extends State<FaceunityWidget> {
 
   @override
   Widget build(BuildContext context) {
+    bool enableMakeup = _devicePerformanceLevel >= DevicePerformanceLevel.levelOne;
     return Stack(
       alignment: Alignment.bottomCenter,
       children: [
         // 美肤
         Positioned(
-          left: 0,
-          right: 0,
-          bottom: 54,
-          child: AnimatedContainer(
-            height: selectedIndex == ModuleType.skin.number ? 148 : 0,
-            duration: const Duration(milliseconds: 100),
-            child: const SkinView(),
-          )
+            left: 0,
+            right: 0,
+            bottom: 54,
+            child: AnimatedContainer(
+              height: selectedIndex == ModuleType.skin.number ? 148 : 0,
+              duration: const Duration(milliseconds: 100),
+              child: const SkinView(),
+            )
         ),
 
         // 美型
         Positioned(
-          left: 0,
-          right: 0,
-          bottom: 54,
-          child: AnimatedContainer(
-            height: selectedIndex == ModuleType.shape.number ? 148 : 0,
-            duration: const Duration(milliseconds: 100),
-            child: const ShapeView(),
-          )
+            left: 0,
+            right: 0,
+            bottom: 54,
+            child: AnimatedContainer(
+              height: selectedIndex == ModuleType.shape.number ? 148 : 0,
+              duration: const Duration(milliseconds: 100),
+              child: const ShapeView(),
+            )
         ),
 
         // 滤镜
         Positioned(
-          left: 0,
-          right: 0,
-          bottom: 54,
-          child: AnimatedContainer(
-            height: selectedIndex == ModuleType.filter.number ? 148 : 0,
-            duration: const Duration(milliseconds: 100),
-            child: const FilterView(),
-          )
+            left: 0,
+            right: 0,
+            bottom: 54,
+            child: AnimatedContainer(
+              height: selectedIndex == ModuleType.filter.number ? 148 : 0,
+              duration: const Duration(milliseconds: 100),
+              child: const FilterView(),
+            )
         ),
-        
+
         // 贴纸
         Positioned(
-          left: 0,
-          right: 0,
-          bottom: 54,
-          child: AnimatedContainer(
-            height: selectedIndex == ModuleType.sticker.number ? 118 : 0,
-            duration: const Duration(milliseconds: 100),
-            child: const StickerView(),
-          )
+            left: 0,
+            right: 0,
+            bottom: 54,
+            child: AnimatedContainer(
+              height: selectedIndex == ModuleType.sticker.number ? 118 : 0,
+              duration: const Duration(milliseconds: 100),
+              child: const StickerView(),
+            )
         ),
 
         // 美妆
         Positioned(
-          left: 0,
-          right: 0,
-          bottom: 54,
-          child: AnimatedContainer(
-            height: selectedIndex == ModuleType.makeup.number ? 148 : 0,
-            duration: const Duration(milliseconds: 100),
-            child: const MakeupView(),
-          )
+            left: 0,
+            right: 0,
+            bottom: 54,
+            child: AnimatedContainer(
+              height: selectedIndex == ModuleType.makeup.number ? 148 : 0,
+              duration: const Duration(milliseconds: 100),
+              child: const MakeupView(),
+            )
         ),
 
         // 美体
         Positioned(
-          left: 0,
-          right: 0,
-          bottom: 54,
-          child: AnimatedContainer(
-            height: selectedIndex == ModuleType.body.number ? 148 : 0,
-            duration: const Duration(milliseconds: 100),
-            child: const BodyView(),
-          )
+            left: 0,
+            right: 0,
+            bottom: 54,
+            child: AnimatedContainer(
+              height: selectedIndex == ModuleType.body.number ? 148 : 0,
+              duration: const Duration(milliseconds: 100),
+              child: const BodyView(),
+            )
         ),
 
         // 底部功能栏
         Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: 54,
-          child: Container(
-            color: const Color.fromARGB(255, 5, 15, 20),
-            child: SegmentBar(
-              onChange: (index) {
-                setState(() {
-                  selectedIndex = index;
-
-                  switch (ModuleType.values[index]) {
-                    case ModuleType.skin:
-                    case ModuleType.shape:
-                    case ModuleType.filter:{
-                      FaceunityPlugin.checkIsBeautyLoaded();
-                      FaceunityPlugin.setMaximumFacesNumber(4);
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 54,
+            child: Container(
+              color: const Color.fromARGB(255, 5, 15, 20),
+              child: SegmentBar(
+                  onChange: (index, enable) {
+                    if (enable) {
+                      if(selectedIndex == index){
+                        selectedIndex = -1;
+                      }else{
+                        selectedIndex = index;
+                      }
                     }
-                      break;
-                    case ModuleType.body:{
-                      FaceunityPlugin.checkIsBodyLoaded();
-                      FaceunityPlugin.setMaximumFacesNumber(1);
-                    }
-                      break;
-                    case ModuleType.sticker:
-                      FaceunityPlugin.setMaximumFacesNumber(4);
-                      break;
-                    case ModuleType.makeup:
-                      FaceunityPlugin.setMaximumFacesNumber(4);
-                      break;
-                    default:
-                  }
-                });
-              }, 
-              items: const ["美肤", "美型", "滤镜", "贴纸", "美妆", "美体"]
-            ),
-          )
+                    setState(() {
+                      switch (ModuleType.values[index]) {
+                        case ModuleType.skin:
+                        case ModuleType.shape:
+                        case ModuleType.filter:{
+                          FaceunityPlugin.checkIsBeautyLoaded();
+                          FaceunityPlugin.setMaximumFacesNumber(4);
+                        }
+                        break;
+                        case ModuleType.body:{
+                          FaceunityPlugin.checkIsBodyLoaded();
+                          FaceunityPlugin.setMaximumFacesNumber(1);
+                        }
+                        break;
+                        case ModuleType.sticker:
+                          FaceunityPlugin.setMaximumFacesNumber(4);
+                          break;
+                        case ModuleType.makeup:
+                          if (enable) {
+                            FaceunityPlugin.setMaximumFacesNumber(4);
+                          }else {
+                            showCommonToast(context: context, content: "该功能只支持在高端机上使用");
+                          }
+                          break;
+                        default:
+                      }
+                    });
+                  },
+                  items: [BarItem("美肤"), BarItem("美型"), BarItem("滤镜"), BarItem("贴纸"), BarItem("美妆", enable: enableMakeup), BarItem("美体")]
+              ),
+            )
         ),
 
         // 效果开关
         Positioned(
-          left: 0,
-          bottom: selectedIndex == ModuleType.sticker.number ? 172 : 202,
-          child: Visibility(
-            visible: selectedIndex >= 0,
-            child: CommonSwitch(
-              onChanged: (value) {
-                value ? FaceunityPlugin.turnOnEffects() : FaceunityPlugin.turnOffEffects();
-              },
-            ) 
-          )
+            left: 0,
+            bottom: selectedIndex == ModuleType.sticker.number ? 172 : 202,
+            child: Visibility(
+                visible: selectedIndex >= 0,
+                child: CommonSwitch(
+                  onChanged: (value) {
+                    value ? FaceunityPlugin.turnOnEffects() : FaceunityPlugin.turnOffEffects();
+                  },
+                )
+            )
         )
       ],
     );
-    
+
   }
 }
