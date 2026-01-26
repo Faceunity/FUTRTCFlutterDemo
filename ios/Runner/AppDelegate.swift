@@ -1,8 +1,9 @@
 import UIKit
 import Flutter
 import TXLiteAVSDK_Professional
-import tencent_trtc_cloud
+import tencent_rtc_sdk
 import TXCustomBeautyProcesserPlugin
+import FURenderKit
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
@@ -17,7 +18,7 @@ import TXCustomBeautyProcesserPlugin
         return customBeautyInstance
     }()
 
-    TencentTRTCCloud.register(customBeautyProcesserFactory: customBeautyInstance)
+    TencentRTCCloud.setBeautyProcesserFactory(factory: customBeautyInstance)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }

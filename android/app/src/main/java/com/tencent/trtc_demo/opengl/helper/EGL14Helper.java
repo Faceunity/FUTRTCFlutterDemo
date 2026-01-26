@@ -10,9 +10,6 @@ import android.opengl.EGLSurface;
 import android.util.Log;
 import android.view.Surface;
 
-import com.tencent.custom.customcapture.render.EGLHelper;
-
-
 @TargetApi(17)
 public class EGL14Helper implements EGLHelper<EGLContext> {
 

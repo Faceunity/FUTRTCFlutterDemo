@@ -19,7 +19,6 @@ import com.tencent.trtc_demo.opengl.FrameBuffer;
 import com.tencent.trtc_demo.opengl.GpuImageGrayscaleFilter;
 import com.tencent.trtc_demo.opengl.OpenGlUtils;
 import com.tencent.trtc_demo.opengl.Rotation;
-import com.tencent.trtcplugin.TRTCCloudPlugin;
 
 import java.nio.FloatBuffer;
 import android.opengl.GLES20;

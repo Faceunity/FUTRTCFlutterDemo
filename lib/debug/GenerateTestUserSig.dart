@@ -29,7 +29,7 @@ class GenerateTestUserSig {
      * You can view your `SDKAppID` after creating an application in the [TRTC console](https://console.cloud.tencent.com/rav).
      * `SDKAppID` uniquely identifies a Tencent Cloud account.
      */
-  static int sdkAppId = ;
+  static int sdkAppId = 1600091426;
 
   /**
      * Signature validity period, which should not be set too short
@@ -49,13 +49,13 @@ class GenerateTestUserSig {
      * Note: this method is for testing only. Before commercial launch, please migrate the UserSig calculation code and key to your backend server to prevent key disclosure and traffic stealing.
      * Reference: https://cloud.tencent.com/document/product/647/17275#Server
      */
-  static String secretKey = ;
+  static String secretKey = '159e0abd980c09943a14e4b61f7a32389d8dde9e405e1768b61eeb0239821f0f';
 
   static genTestSig(String userId) {
-    if (kIsWeb) {
-      return JsGenerateTestUserSig()
-          .jsGenTestUserSig(sdkAppId, secretKey, userId, expireTime);
-    }
+    // if (kIsWeb) {
+    //   return JsGenerateTestUserSig()
+    //       .jsGenTestUserSig(sdkAppId, secretKey, userId, expireTime);
+    // }
     int currTime = _getCurrentTime();
     String sig = '';
     Map<String, dynamic> sigDoc = new Map<String, dynamic>();
