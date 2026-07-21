@@ -55,7 +55,7 @@ class MeetingPageState extends State<MeetingPage> with WidgetsBindingObserver {
       onError: (errCode, errMsg) {
         _printLog(1, "TRTCCloudExample TRTCCloudListenerparseCallbackParam onError errCode:$errCode errMsg:$errMsg");
 
-        _showErrorDialog(errMsg);
+        // _showErrorDialog(errMsg);
       },
       onWarning: (warningCode, warningMsg) {
         _printLog(1, "TRTCCloudExample TRTCCloudListenerparseCallbackParam onWarning warningCode:$warningCode warningMsg:$warningMsg");
